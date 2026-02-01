@@ -35,7 +35,7 @@ export default function BacktestPage() {
     const strategy = strategies.find(s => s.id === selectedStrategyId);
     if (!strategy) return;
 
-    const newResult = runBacktest(
+    const newResult = await runBacktest(
       strategy,
       pair, 
       timeframe, 

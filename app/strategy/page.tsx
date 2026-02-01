@@ -3,12 +3,14 @@
 import { Navbar } from '@/components/layout/navbar';
 import { Sidebar } from '@/components/layout/sidebar';
 import { StrategyBuilder } from '@/components/features/strategy/strategy-builder';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { PlusCircle, LayoutGrid, ArrowLeft, Trash2 } from 'lucide-react';
 import { useStrategyStore } from '@/lib/strategy-store';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-export default function StrategyPage() {
+export const dynamic = 'force-dynamic';
+
+function StrategyContent() {
   const [view, setView] = useState<'initial' | 'create' | 'list'>('initial');
   const { strategies, deleteStrategy } = useStrategyStore();
   const searchParams = useSearchParams();
@@ -189,4 +191,12 @@ export default function StrategyPage() {
       </footer>
     </div>
   );
+}
+
+export default function StrategyPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-500">Loading Strategy Hub...</div>}>
+            <StrategyContent />
+        </Suspense>
+    );
 }
