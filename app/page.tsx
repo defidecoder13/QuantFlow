@@ -7,13 +7,28 @@ import { DashboardKPIs } from '@/features/dashboard/dashboard-kpis';
 import { DashboardEquity } from '@/features/dashboard/dashboard-equity';
 import { usePaperStore } from '@/lib/paper-store';
 import Link from 'next/link';
-import { Search, Filter, Download, MoreHorizontal, Wallet, Activity, ArrowRight } from 'lucide-react';
-
+import { Search, Filter, Download, MoreHorizontal, Wallet, Activity, ArrowRight, TrendingUp, Cpu } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useStrategyStore } from '@/lib/strategy-store';
+import { ActivePairRow } from '@/components/layout/active-pair-row';
 
 export default function Home() {
+  const router = useRouter();
   const { balance, orders, activeStrategies } = usePaperStore();
   const { strategies } = useStrategyStore();
+  
+  const [query, setQuery] = useState('');
+  const [allPairs, setAllPairs] = useState<string[]>([]);
+  const [pairsLoaded, setPairsLoaded] = useState(false);
+  
+  const pairs = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'LINK/USDT', 'AVAX/USDT'];
+  
+  const formatPairLabel = (symbol: string) => {
+    if (!symbol || symbol.length <= 4) return symbol;
+    const base = symbol.substring(0, symbol.length - 4);
+    const quote = symbol.slice(-4);
+    return `${base}/${quote}`;
+  };
 
   const activeOrders = orders.filter(o => o.status === 'OPEN');
   
@@ -117,84 +132,105 @@ export default function Home() {
               </div>
 
               {/* Mobile Only Sections */}
-              <div className="flex flex-col gap-6 md:hidden">
+              <div className="flex flex-col gap-4 md:hidden">
                 
-                {/* Recent Pairs Section */}
-                <div className="glass rounded-xl overflow-hidden p-5">
+                {/* Active Pairs Section (Synced with Sidebar) */}
+                <div className="glass rounded-xl overflow-hidden p-4">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-bold text-zinc-100">Recent Pairs</h3>
-                        <div className="relative">
-                            <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
-                            <input 
-                                type="text" 
-                                placeholder="Search..." 
-                                className="bg-zinc-900 border border-zinc-800 rounded-full pl-8 pr-3 py-1 text-xs text-zinc-300 w-28 focus:border-cyan-500/50 outline-none"
-                            />
-                        </div>
+                        <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                             <TrendingUp size={14} /> Active Pairs
+                        </h3>
                     </div>
                     
-                    <div className="space-y-3">
-                        {orders.length === 0 ? (
-                            <div className="text-center py-4 text-zinc-500 text-sm italic">
-                                No trading activity.
+                    {/* Search Bar */}
+                    <div className="relative mb-4">
+                        <Search className="absolute left-3 top-2.5 text-zinc-500" size={16} />
+                        <input 
+                            type="text" 
+                            placeholder="Search pairs..." 
+                            value={query}
+                            onChange={async (e) => {
+                                const v = e.target.value;
+                                setQuery(v);
+                                if (!pairsLoaded && v.trim().length > 0) {
+                                    try {
+                                    const res = await fetch('https://api.binance.com/api/v3/exchangeInfo');
+                                    const data: any = await res.json();
+                                    const symbols = (data && data.symbols) || [];
+                                    const usdtPairs = (symbols as any[])
+                                        .filter((s) => s.quoteAsset === 'USDT' && s.status === 'TRADING')
+                                        .map((s) => s.symbol as string);
+                                    const unique = Array.from(new Set(usdtPairs as string[]));
+                                    setAllPairs(unique);
+                                    setPairsLoaded(true);
+                                    } catch (err) {
+                                    console.error('Mobile fetchBinancePairs error:', err);
+                                    }
+                                }
+                            }}
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded-md py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500/50 text-zinc-200"
+                        />
+                         {query && allPairs.length > 0 && (
+                            <div className="absolute left-0 right-0 mt-1 z-20 bg-zinc-900 border border-zinc-800 rounded-md shadow-sm max-h-60 overflow-auto">
+                            {allPairs
+                                .filter((p) => p.toLowerCase().includes(query.toLowerCase()))
+                                .slice(0, 50)
+                                .map((p) => (
+                                <div
+                                    key={p}
+                                    className="px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800 cursor-pointer"
+                                    onClick={() => {
+                                        router.push(`/market?pair=${p}`);
+                                        setQuery(''); // Clear search on select
+                                    }}
+                                >
+                                    {formatPairLabel(p)}
+                                </div>
+                                ))}
                             </div>
-                        ) : (
-                            // Deduplicate pairs from ALL orders (taking latest)
-                            Array.from(new Set(orders.map(o => o.pair))).slice(0, 5).map(pair => {
-                                const latestOrder = orders.find(o => o.pair === pair);
-                                const isActive = latestOrder?.status === 'OPEN';
-                                return (
-                                    <div key={pair} className="flex items-center justify-between bg-zinc-900/50 p-3 rounded-lg border border-zinc-800">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded bg-zinc-800 flex items-center justify-center font-bold text-xs">
-                                                {pair.split('/')[0].substring(0,1)}
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-sm">{pair}</div>
-                                                <div className="text-[10px] text-zinc-500">
-                                                    {latestOrder?.side} • {isActive ? 'Open' : 'Closed'}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className={`text-sm font-bold font-mono ${latestOrder?.pnl && latestOrder.pnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                            {latestOrder?.pnl && latestOrder.pnl >= 0 ? '+' : ''}{latestOrder?.pnl.toFixed(2)}
-                                        </div>
-                                    </div>
-                                );
-                            })
                         )}
+                    </div>
+                    
+                    <div className="space-y-1">
+                        {pairs.map((pair) => (
+                           <ActivePairRow key={pair} label={pair} />
+                        ))}
                     </div>
                 </div>
 
-                {/* All Strategies Section */}
-                <div className="glass rounded-xl overflow-hidden p-5">
+                {/* My Strategies Section (Synced with Sidebar style) */}
+                <div className="glass rounded-xl overflow-hidden p-4">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-bold text-zinc-100">My Strategies</h3>
+                        <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                             <Cpu size={14} /> My Strategies
+                        </h3>
                         <Link href="/strategy" className="p-1.5 bg-zinc-900 rounded-lg text-cyan-500 hover:bg-zinc-800 transition-colors">
                             <ArrowRight size={16} />
                         </Link>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-1">
                         {strategies.length === 0 ? (
                             <div className="text-center py-4 text-zinc-500 text-sm italic">
                                 No strategies created.
                             </div>
                         ) : (
-                            strategies.slice(0, 5).map(strat => {
-                                const isActive = activeStrategies.includes(strat.id);
-                                return (
-                                <div key={strat.id} className="bg-zinc-900/50 p-3 rounded-lg border border-zinc-800 flex items-center justify-between">
-                                    <div>
-                                        <div className="font-bold text-sm">{strat.name}</div>
-                                        <div className="text-[10px] text-zinc-500">{strat.groupOperator} Logic • {strat.groups.length} Groups</div>
+                            strategies.map(strat => (
+                                <div 
+                                    key={strat.id} 
+                                    onClick={() => router.push(`/strategy?edit=${strat.id}`)}
+                                    className="px-2 py-2 group cursor-pointer hover:bg-zinc-900/50 rounded-md transition-all border border-transparent hover:border-zinc-800"
+                                >
+                                    <div className="flex items-center justify-between mb-1">
+                                    <span className="text-sm font-medium text-zinc-200 truncate">{strat.name}</span>
+                                    <div className={`w-1.5 h-1.5 rounded-full ${strat.isActive ? 'bg-emerald-500' : 'bg-zinc-700'}`} />
                                     </div>
-                                    <div className={`px-2 py-0.5 rounded text-[10px] font-bold border ${isActive ? 'bg-emerald-900/20 text-emerald-500 border-emerald-900/30' : 'bg-zinc-800 text-zinc-500 border-zinc-700'}`}>
-                                        {isActive ? 'ACTIVE' : 'PAUSED'}
+                                    <div className="flex items-center justify-between text-[10px] text-zinc-500">
+                                    <span>{strat.groupOperator} Logic</span>
+                                    <span className="font-mono">RISK: {strat.risk.stopLoss}%</span>
                                     </div>
                                 </div>
-                                );
-                            })
+                            ))
                         )}
                     </div>
                 </div>
