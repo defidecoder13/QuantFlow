@@ -108,10 +108,10 @@ export const StrategyBuilder = ({ onBack, initialState, strategyId }: Props) => 
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl">
+    <div className="flex flex-col h-full bg-zinc-950 border-t border-zinc-800 md:border-none">
       
       {/* Top Bar */}
-      <div className="h-16 border-b border-zinc-800 flex items-center justify-between px-6 bg-zinc-950">
+      <div className="h-16 border-b border-zinc-800 flex items-center justify-between px-4 md:px-6 bg-zinc-950 flex-shrink-0">
          <div className="flex items-center gap-4">
            {onBack && (
              <button onClick={onBack} className="p-2 hover:bg-zinc-900 rounded-full text-zinc-500 hover:text-white transition-colors">
@@ -121,27 +121,27 @@ export const StrategyBuilder = ({ onBack, initialState, strategyId }: Props) => 
            <input 
              value={state.name}
              onChange={(e) => setState({ ...state, name: e.target.value })}
-             className="bg-transparent text-xl font-bold text-white outline-none placeholder-zinc-600 focus:placeholder-zinc-500 w-64"
+             className="bg-transparent text-lg md:text-xl font-bold text-white outline-none placeholder-zinc-600 focus:placeholder-zinc-500 w-40 md:w-64"
              placeholder="Strategy Name"
            />
          </div>
-         <div className="flex items-center gap-4">
-             {strategyId && <span className="text-xs text-zinc-500 uppercase font-bold">Editing Mode</span>}
-             <button onClick={handleSave} className="flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-bold rounded-lg shadow-lg shadow-cyan-900/20 transition-all">
-               <Save size={16} /> {strategyId ? 'Update Strategy' : 'Save Strategy'}
+         <div className="flex items-center gap-2 md:gap-4">
+             {strategyId && <span className="hidden md:inline text-xs text-zinc-500 uppercase font-bold">Editing Mode</span>}
+             <button onClick={handleSave} className="flex items-center gap-2 px-3 md:px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs md:text-sm font-bold rounded-lg shadow-lg shadow-cyan-900/20 transition-all">
+               <Save size={16} /> <span className="hidden md:inline">{strategyId ? 'Update Strategy' : 'Save Strategy'}</span><span className="md:hidden">Save</span>
              </button>
          </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 flex-col md:flex-row overflow-hidden">
         
         {/* Left Panel: Library */}
-        <div className="w-80 flex-shrink-0">
+        <div className="w-full md:w-80 flex-shrink-0 border-b md:border-b-0 md:border-r border-zinc-800 h-[300px] md:h-auto overflow-hidden flex flex-col">
           <SignalLibrary onSelect={handleSelectSignal} />
         </div>
 
         {/* Right Panel: Rule Builder */}
-        <div className="flex-1 flex flex-col bg-zinc-900/20">
+        <div className="flex-1 flex flex-col bg-zinc-900/20 overflow-hidden">
           
           <div className="flex-1 overflow-y-auto p-8">
              <div className="max-w-4xl mx-auto space-y-8">
@@ -187,10 +187,13 @@ export const StrategyBuilder = ({ onBack, initialState, strategyId }: Props) => 
           </div>
 
           {/* Bottom: Risk */}
-          <RiskSection 
-             risk={state.risk} 
-             onChange={(updates) => setState(prev => ({ ...prev, risk: { ...prev.risk, ...updates } }))} 
-          />
+          {/* Bottom: Risk */}
+          <div className="flex-shrink-0 border-t border-zinc-800 bg-zinc-950 p-4">
+              <RiskSection 
+                 risk={state.risk} 
+                 onChange={(updates) => setState(prev => ({ ...prev, risk: { ...prev.risk, ...updates } }))} 
+              />
+          </div>
           
         </div>
       </div>

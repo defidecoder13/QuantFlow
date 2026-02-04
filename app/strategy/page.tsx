@@ -53,8 +53,8 @@ function StrategyContent() {
       <div className="flex flex-col md:flex-row flex-1 overflow-hidden h-full">
         <Sidebar />
         
-        <main className="flex-1 p-6 overflow-y-auto">
-          <div className="max-w-[1600px] mx-auto">
+        <main className={`flex-1 overflow-y-auto ${view === 'create' ? 'p-0 overflow-hidden' : 'p-6'}`}>
+          <div className={`${view === 'create' ? 'h-full' : 'max-w-[1600px] mx-auto'}`}>
              
              {view === 'initial' && (
                <div className="flex flex-col items-center justify-center h-[calc(80vh-100px)] space-y-12">
@@ -104,11 +104,7 @@ function StrategyContent() {
              )}
 
              {view === 'create' && (
-               <div className="space-y-4">
-                 <button onClick={handleBack} className="flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors">
-                   <ArrowLeft size={16} /> Back to Hub
-                 </button>
-                 {/* Key forces remount when switching strategies */}
+               <div className="h-full flex flex-col">
                  <StrategyBuilder 
                    key={editId || 'new'} 
                    onBack={handleBack} 

@@ -43,15 +43,20 @@ export const FilterGroup = ({ group, isActive, onUpdate, onRemove, onRemoveFilte
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-zinc-800/50">
-        <select
-          value={group.operator}
-          onChange={(e) => onUpdate({ operator: e.target.value as OperatorType })}
-          className="bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs font-bold rounded-lg px-3 py-1.5 outline-none focus:border-cyan-500/50"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <option value="AND">All filters must match (AND)</option>
-          <option value="OR">At least one matches (OR)</option>
-        </select>
+        <div className="relative">
+          <select
+            value={group.operator}
+            onChange={(e) => onUpdate({ operator: e.target.value as OperatorType })}
+            className="appearance-none bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs font-bold rounded-lg pl-3 pr-8 py-1.5 outline-none focus:border-cyan-500/50 cursor-pointer hover:bg-zinc-900 transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <option value="AND">AND (Match All)</option>
+            <option value="OR">OR (Match Any)</option>
+          </select>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+             <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </div>
+        </div>
 
         <div className="flex items-center gap-2">
           {isActive && <span className="text-[10px] text-cyan-500 font-bold uppercase tracking-wider px-2">Editing</span>}

@@ -9,10 +9,16 @@ import { usePaperStore } from '@/lib/paper-store';
 import Link from 'next/link';
 import { Search, Filter, Download, MoreHorizontal, Wallet, Activity, ArrowRight } from 'lucide-react';
 
+import { useStrategyStore } from '@/lib/strategy-store';
+
 export default function Home() {
   const { balance, orders, activeStrategies } = usePaperStore();
+  const { strategies } = useStrategyStore();
 
   const activeOrders = orders.filter(o => o.status === 'OPEN');
+  
+  // Get full strategy objects for active IDs
+  const runningStrategies = strategies.filter(s => activeStrategies.includes(s.id));
   const closedOrders = orders.filter(o => o.status === 'CLOSED');
   const unrealizedPnL = activeOrders.reduce((acc, o) => acc + o.pnl, 0);
   const totalBalance = balance + unrealizedPnL;
@@ -62,7 +68,8 @@ export default function Home() {
 
               <DashboardEquity />
               
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Desktop: Recent Activity / Mobile: Hidden */}
+              <div className="hidden md:grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-3 glass rounded-xl overflow-hidden flex flex-col">
                   <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
                     <h3 className="text-lg font-semibold flex items-center gap-2"><Activity size={18} /> Recent Activity</h3>
@@ -107,6 +114,85 @@ export default function Home() {
                     )}
                   </div>
                 </div>
+              </div>
+
+              {/* Mobile Only Sections */}
+              <div className="flex flex-col gap-6 md:hidden">
+                
+                {/* Active Pairs Section */}
+                <div className="glass rounded-xl overflow-hidden p-5">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-bold text-zinc-100">Active Pairs</h3>
+                        <div className="relative">
+                            <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
+                            <input 
+                                type="text" 
+                                placeholder="Search..." 
+                                className="bg-zinc-900 border border-zinc-800 rounded-full pl-8 pr-3 py-1 text-xs text-zinc-300 w-28 focus:border-cyan-500/50 outline-none"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                        {activeOrders.length === 0 ? (
+                            <div className="text-center py-4 text-zinc-500 text-sm italic">
+                                No active pairs.
+                            </div>
+                        ) : (
+                            // Deduplicate pairs from active orders
+                            Array.from(new Set(activeOrders.map(o => o.pair))).map(pair => {
+                                const order = activeOrders.find(o => o.pair === pair);
+                                return (
+                                    <div key={pair} className="flex items-center justify-between bg-zinc-900/50 p-3 rounded-lg border border-zinc-800">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded bg-zinc-800 flex items-center justify-center font-bold text-xs">
+                                                {pair.split('/')[0].substring(0,1)}
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-sm">{pair}</div>
+                                                <div className="text-[10px] text-zinc-500">{order?.side} • Entry: {order?.entryPrice.toFixed(2)}</div>
+                                            </div>
+                                        </div>
+                                        <div className={`text-sm font-bold font-mono ${order?.pnl && order.pnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                            {order?.pnl && order.pnl >= 0 ? '+' : ''}{order?.pnl.toFixed(2)}
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+
+                {/* My Strategies Section */}
+                <div className="glass rounded-xl overflow-hidden p-5">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-bold text-zinc-100">My Strategies</h3>
+                        <Link href="/strategy" className="p-1.5 bg-zinc-900 rounded-lg text-cyan-500 hover:bg-zinc-800 transition-colors">
+                            <ArrowRight size={16} />
+                        </Link>
+                    </div>
+
+                    <div className="space-y-3">
+                        {runningStrategies.length === 0 ? (
+                            <div className="text-center py-4 text-zinc-500 text-sm italic">
+                                No active strategies.
+                            </div>
+                        ) : (
+                            runningStrategies.map(strat => (
+                                <div key={strat.id} className="bg-zinc-900/50 p-3 rounded-lg border border-zinc-800 flex items-center justify-between">
+                                    <div>
+                                        <div className="font-bold text-sm">{strat.name}</div>
+                                        <div className="text-[10px] text-zinc-500">{strat.groupOperator} Logic • {strat.groups.length} Groups</div>
+                                    </div>
+                                    <div className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-900/20 text-emerald-500 border border-emerald-900/30">
+                                        ACTIVE
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
               </div>
             </div>
           </div>
