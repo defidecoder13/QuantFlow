@@ -50,7 +50,7 @@ function StrategyContent() {
     <div className="flex flex-col min-h-screen bg-zinc-950 text-zinc-100 selection:bg-cyan-500/30">
       <Navbar />
       
-      <div className="flex flex-1">
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden h-full">
         <Sidebar />
         
         <main className="flex-1 p-6 overflow-y-auto">
@@ -59,7 +59,7 @@ function StrategyContent() {
              {view === 'initial' && (
                <div className="flex flex-col items-center justify-center h-[calc(80vh-100px)] space-y-12">
                  <div className="text-center space-y-4">
-                   <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-500">Strategy Lab</h1>
+                   <h1 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-500">Strategy Lab</h1>
                    <p className="text-zinc-400 text-lg max-w-lg mx-auto">Design, backtest, and deploy algorithmic trading strategies with our advanced visual builder.</p>
                  </div>
                  

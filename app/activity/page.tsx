@@ -12,22 +12,22 @@ export default function ActivityPage() {
     <div className="flex flex-col h-screen overflow-hidden bg-zinc-950 text-zinc-100 selection:bg-cyan-500/30">
       <Navbar />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden h-full">
         <Sidebar />
         
         <main className="flex-1 p-6 overflow-y-auto">
           <div className="max-w-[1400px] mx-auto">
             <div className="space-y-6">
               <div className="glass rounded-xl overflow-hidden flex flex-col">
-                <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                <div className="px-6 py-4 border-b border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex flex-col md:flex-row md:items-center gap-4 w-full md:w-auto">
                     <h3 className="text-lg font-semibold">Activity Log</h3>
-                    <div className="flex items-center bg-zinc-900 rounded-md border border-zinc-800 px-3 py-1">
+                    <div className="flex items-center bg-zinc-900 rounded-md border border-zinc-800 px-3 py-1 w-full md:w-auto">
                       <Search size={14} className="text-zinc-500 mr-2" />
-                      <input type="text" placeholder="Filter trades..." className="bg-transparent border-none text-xs focus:outline-none w-48" />
+                      <input type="text" placeholder="Filter trades..." className="bg-transparent border-none text-xs focus:outline-none w-full md:w-48" />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 self-end md:self-auto">
                     <button className="p-2 hover:bg-zinc-800 rounded-md text-zinc-400"><Download size={18} /></button>
                     <button className="p-2 hover:bg-zinc-800 rounded-md text-zinc-400"><Filter size={18} /></button>
                     <button className="p-2 hover:bg-zinc-800 rounded-md text-zinc-400"><MoreHorizontal size={18} /></button>

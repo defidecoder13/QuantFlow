@@ -24,7 +24,7 @@ export default function Home() {
     <div className="flex flex-col h-screen overflow-hidden bg-zinc-950 text-zinc-100 selection:bg-cyan-500/30">
       <Navbar />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden h-full">
         <Sidebar />
         
         <main className="flex-1 p-6 overflow-y-auto">

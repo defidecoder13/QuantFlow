@@ -33,7 +33,7 @@ export const Sidebar = () => {
   };
 
   return (
-    <aside className="w-64 border-r border-zinc-800 bg-zinc-950 flex flex-col h-full overflow-y-auto">
+    <aside className="w-64 border-r border-zinc-800 bg-zinc-950 flex-col h-full overflow-y-auto hidden md:flex">
       <StrategyRunner />
       <div className="p-4 border-b border-zinc-800">
         <div className="relative">

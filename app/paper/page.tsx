@@ -20,11 +20,11 @@ export default function PaperPage() {
     <div className="flex flex-col min-h-screen bg-zinc-950 text-zinc-100 selection:bg-cyan-500/30">
       <Navbar />
       
-      <div className="flex flex-1">
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden h-full">
         <Sidebar />
         
         <main className="flex-1 p-6 overflow-y-auto">
-          <div className="max-w-[1400px] mx-auto h-[calc(100vh-140px)]">
+          <div className="max-w-[1400px] mx-auto h-full lg:h-[calc(100vh-140px)]">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
               
               {/* Left Column: Chart & Orders */}
