@@ -119,10 +119,10 @@ export default function Home() {
               {/* Mobile Only Sections */}
               <div className="flex flex-col gap-6 md:hidden">
                 
-                {/* Active Pairs Section */}
+                {/* Recent Pairs Section */}
                 <div className="glass rounded-xl overflow-hidden p-5">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-bold text-zinc-100">Active Pairs</h3>
+                        <h3 className="font-bold text-zinc-100">Recent Pairs</h3>
                         <div className="relative">
                             <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
                             <input 
@@ -134,14 +134,15 @@ export default function Home() {
                     </div>
                     
                     <div className="space-y-3">
-                        {activeOrders.length === 0 ? (
+                        {orders.length === 0 ? (
                             <div className="text-center py-4 text-zinc-500 text-sm italic">
-                                No active pairs.
+                                No trading activity.
                             </div>
                         ) : (
-                            // Deduplicate pairs from active orders
-                            Array.from(new Set(activeOrders.map(o => o.pair))).map(pair => {
-                                const order = activeOrders.find(o => o.pair === pair);
+                            // Deduplicate pairs from ALL orders (taking latest)
+                            Array.from(new Set(orders.map(o => o.pair))).slice(0, 5).map(pair => {
+                                const latestOrder = orders.find(o => o.pair === pair);
+                                const isActive = latestOrder?.status === 'OPEN';
                                 return (
                                     <div key={pair} className="flex items-center justify-between bg-zinc-900/50 p-3 rounded-lg border border-zinc-800">
                                         <div className="flex items-center gap-3">
@@ -150,11 +151,13 @@ export default function Home() {
                                             </div>
                                             <div>
                                                 <div className="font-bold text-sm">{pair}</div>
-                                                <div className="text-[10px] text-zinc-500">{order?.side} • Entry: {order?.entryPrice.toFixed(2)}</div>
+                                                <div className="text-[10px] text-zinc-500">
+                                                    {latestOrder?.side} • {isActive ? 'Open' : 'Closed'}
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className={`text-sm font-bold font-mono ${order?.pnl && order.pnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                            {order?.pnl && order.pnl >= 0 ? '+' : ''}{order?.pnl.toFixed(2)}
+                                        <div className={`text-sm font-bold font-mono ${latestOrder?.pnl && latestOrder.pnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                            {latestOrder?.pnl && latestOrder.pnl >= 0 ? '+' : ''}{latestOrder?.pnl.toFixed(2)}
                                         </div>
                                     </div>
                                 );
@@ -163,7 +166,7 @@ export default function Home() {
                     </div>
                 </div>
 
-                {/* My Strategies Section */}
+                {/* All Strategies Section */}
                 <div className="glass rounded-xl overflow-hidden p-5">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-bold text-zinc-100">My Strategies</h3>
@@ -173,22 +176,25 @@ export default function Home() {
                     </div>
 
                     <div className="space-y-3">
-                        {runningStrategies.length === 0 ? (
+                        {strategies.length === 0 ? (
                             <div className="text-center py-4 text-zinc-500 text-sm italic">
-                                No active strategies.
+                                No strategies created.
                             </div>
                         ) : (
-                            runningStrategies.map(strat => (
+                            strategies.slice(0, 5).map(strat => {
+                                const isActive = activeStrategies.includes(strat.id);
+                                return (
                                 <div key={strat.id} className="bg-zinc-900/50 p-3 rounded-lg border border-zinc-800 flex items-center justify-between">
                                     <div>
                                         <div className="font-bold text-sm">{strat.name}</div>
                                         <div className="text-[10px] text-zinc-500">{strat.groupOperator} Logic • {strat.groups.length} Groups</div>
                                     </div>
-                                    <div className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-900/20 text-emerald-500 border border-emerald-900/30">
-                                        ACTIVE
+                                    <div className={`px-2 py-0.5 rounded text-[10px] font-bold border ${isActive ? 'bg-emerald-900/20 text-emerald-500 border-emerald-900/30' : 'bg-zinc-800 text-zinc-500 border-zinc-700'}`}>
+                                        {isActive ? 'ACTIVE' : 'PAUSED'}
                                     </div>
                                 </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
                 </div>
